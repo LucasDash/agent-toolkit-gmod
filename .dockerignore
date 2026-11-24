@@ -1,0 +1,11 @@
+.git
+.github
+.vscode
+.idea
+tests
+captures
+server/.env
+server/.state
+server/backups
+server/.steamcmd-cache
+**/*.md

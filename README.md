@@ -1,10 +1,20 @@
 # Agent Toolkit for Garry's Mod
 
-Agent Toolkit contains Agent Bridge, a Garry's Mod addon providing game-side
-observations and development utilities to external agents. The installed
-addon and its GTerm package keep the `agent_bridge` name.
-[GTerm](https://github.com/Earu/GTerm) supplies the MCP transport and exposes
-the addon's opt-in tool package.
+Agent Toolkit is the home for the game-side and server-side parts of our
+Garry's Mod agent environment. It contains Agent Bridge, an addon providing
+bounded observations and development utilities, and a Docker-based dedicated
+server deployment. The installed addon and its opt-in package keep the
+`agent_bridge` name.
+
+[GTerm-Codex](https://github.com/LucasDash/GTerm-Codex) provides the operator
+console, native module and MCP interface. Its package consent is independent
+of the addon. Client-side capabilities require a connected game client; a
+dedicated server does not provide a player's screen or client realm.
+
+The [server guide](server/README.md) describes the local Docker setup and its
+current remote-operation limits. The [GTerm operator workflow](https://github.com/LucasDash/GTerm-Codex)
+explains the GTerm side. Neither repository alone contains a running game server
+or its persistent data.
 
 ## Install and use
 
@@ -160,6 +170,9 @@ tools require a reachable client realm and mounted package. A remote server is
 a separate target. See [status](STATUS.md) for checks actually completed.
 
 ## Ownership and development
+
+The clean local dedicated-server deployment, persistent data policy and
+operator workflows are documented in [server/README.md](server/README.md).
 
 `AgentBridge` is the sole runtime namespace. Shared helpers describe versioned, bounded observations; `AgentBridge.Chat` owns one PlayerSay hook and `AgentBridge.Capture` owns its rendering hooks and cancellation command.
 Capture leaves the player's camera and controls available. It excludes the HUD and held viewmodel and captures a fixed view established at request time. `AgentBridge.Chat.Stop()` unregisters its chat hook; `AgentBridge.StopCapture()` stops capture. Source removal takes effect fully after a fresh process.
