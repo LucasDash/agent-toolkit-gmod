@@ -6,6 +6,10 @@ installation. The current setup is a development baseline: one local human
 client has connected through the host's LAN address; remote hosting,
 multi-client play and recovery on a different host remain unverified.
 
+The default Compose file pulls the published server and GTerm relay images from
+GHCR. To use the source checkout instead, pass `-BuildLocal` to the PowerShell
+launcher or add `--file compose.dev.yaml` to Linux Compose commands.
+
 ## Start and inspect
 
 Install Git and Docker Engine with Compose on an x86-64 host. Docker Desktop on
@@ -23,15 +27,33 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 .\Get-ServerStatus.ps1
 ```
 
+The example `.env` selects the mutable `main` image tag. For a repeatable host,
+set `AGENT_TOOLKIT_VERSION` to a published version tag such as `v0.1.0`, or to
+an immutable `sha-<commit>` tag. The images are published after commits reach
+`main` and when a `v*` tag is pushed. Public pulls work without login once the
+GHCR packages are public; otherwise authenticate to GHCR first.
+
 On a Linux Docker host, from the same directory, use Compose directly:
 
 ```sh
 test -e .env || cp .env.example .env
 # Edit .env for this host before starting.
-docker compose --env-file .env up -d --build
+docker compose --env-file .env pull
+docker compose --env-file .env up -d
 docker compose --env-file .env ps
 docker compose --env-file .env logs --tail 80 gmod
 ```
+
+For a local source build, use both Compose files so the development overlay is
+merged into the base server configuration:
+
+```sh
+docker compose --file compose.yaml --file compose.dev.yaml --env-file .env up -d --build
+```
+
+The server image contains Agent Bridge and the pinned GTerm module, but not the
+dedicated-server installation: SteamCMD downloads app 4020 on first start into
+the persistent Docker volume.
 
 The first start downloads app 4020 through anonymous SteamCMD. It can take a
 while and needs several gigabytes of free space. Installed server data,
@@ -119,9 +141,10 @@ been validated in this deployment.
 
 ## Remote host workflow
 
-Clone this repository on a separate Docker host and manage it over SSH. Compose
-builds from that host's checkout; the named volume and SteamCMD staging path
-are on that host. Keep GTerm loopback-only. An SSH local forward such as
+Install Docker Engine and Compose on a separate Linux host, copy this directory
+or clone the repository, and set that host's values in `.env`. Compose pulls
+the selected GHCR images; the named volume and SteamCMD staging path are on that
+host. Keep GTerm loopback-only. An SSH local forward such as
 `ssh -L 27516:127.0.0.1:27516 <server-host>` can provide a console transport,
 subject to the filesystem limitation above. Linux-host deployment and this
 remote connection have not been validated end to end.

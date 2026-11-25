@@ -2,10 +2,8 @@ name: agent-toolkit-gmod
 
 services:
   gmod:
-    build:
-      context: ..
-      dockerfile: server/Dockerfile
-    image: agent-toolkit-gmod-server:local
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-server:${AGENT_TOOLKIT_VERSION:-main}
+    pull_policy: always
     restart: unless-stopped
     stop_grace_period: 60s
     environment:
@@ -52,9 +50,8 @@ services:
       start_period: 30m
 
   gterm-relay:
-    build:
-      context: ./gterm-relay
-    image: agent-toolkit-gmod-gterm-relay:local
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-gterm-relay:${AGENT_TOOLKIT_VERSION:-main}
+    pull_policy: always
     network_mode: service:gmod
     depends_on:
       gmod:
