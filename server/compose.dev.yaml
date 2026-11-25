@@ -1,0 +1,13 @@
+services:
+  gmod:
+    image: agent-toolkit-gmod-server:local
+    pull_policy: build
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+
+  gterm-relay:
+    image: agent-toolkit-gmod-gterm-relay:local
+    pull_policy: build
+    build:
+      context: ./gterm-relay

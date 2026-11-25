@@ -1,0 +1,68 @@
+name: Container images
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Buildx
+        run: docker buildx inspect --bootstrap
+      - name: Build dedicated server image
+        run: >-
+          docker buildx build --load --platform linux/amd64
+          --file server/Dockerfile
+          --tag agent-toolkit-gmod-server:pr .
+      - name: Build GTerm relay image
+        run: >-
+          docker buildx build --load --platform linux/amd64
+          --file server/gterm-relay/Dockerfile
+          --tag agent-toolkit-gmod-gterm-relay:pr server/gterm-relay
+
+  publish:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Set up Buildx
+        run: docker buildx inspect --bootstrap
+      - name: Publish images
+        env:
+          IMAGE_TAG: ${{ github.ref_name }}
+          IMAGE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          server_image=ghcr.io/lucasdash/agent-toolkit-gmod-server
+          relay_image=ghcr.io/lucasdash/agent-toolkit-gmod-gterm-relay
+          sha_tag="sha-${IMAGE_SHA}"
+
+          docker buildx build --platform linux/amd64 \
+            --file server/Dockerfile \
+            --tag "${server_image}:${IMAGE_TAG}" \
+            --tag "${server_image}:${sha_tag}" \
+            --push .
+
+          docker buildx build --platform linux/amd64 \
+            --file server/gterm-relay/Dockerfile \
+            --tag "${relay_image}:${IMAGE_TAG}" \
+            --tag "${relay_image}:${sha_tag}" \
+            --push server/gterm-relay

@@ -4,7 +4,11 @@ Thumbs.db
 .idea/
 .env
 .env.*
+!/server/.env.example
 *.log
 captures/
 
 /tests/
+/server/.state/
+/server/backups/
+/server/.steamcmd-cache/

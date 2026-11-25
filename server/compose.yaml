@@ -1,0 +1,76 @@
+name: agent-toolkit-gmod
+
+services:
+  gmod:
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-server:${AGENT_TOOLKIT_VERSION:-main}
+    pull_policy: always
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      SERVER_BRANCH: ${SERVER_BRANCH:-x86-64}
+      SERVER_PORT: ${SERVER_PORT:-28115}
+      SERVER_MAP: ${SERVER_MAP:-gm_construct}
+      SERVER_GAMEMODE: ${SERVER_GAMEMODE:-sandbox}
+      SERVER_MAXPLAYERS: ${SERVER_MAXPLAYERS:-8}
+    command:
+      - +gamemode
+      - ${SERVER_GAMEMODE:-sandbox}
+      - +sv_lan
+      - "0"
+      - +map
+      - ${SERVER_MAP:-gm_construct}
+      - +maxplayers
+      - ${SERVER_MAXPLAYERS:-8}
+    ports:
+      - ${SERVER_BIND_ADDRESS:-127.0.0.1}:${HOST_GAME_PORT:-28115}:${SERVER_PORT:-28115}/udp
+      - ${GTERM_BIND_ADDRESS:-127.0.0.1}:${GTERM_HOST_PORT:-27516}:27515/tcp
+    volumes:
+      - gmod_data:/srv/gmod
+      - type: bind
+        source: ${STEAMCMD_STAGING_PATH:-./.steamcmd-cache}
+        target: /home/gmod/.local/share/Steam/steamapps/downloading
+        bind:
+          create_host_path: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "5"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pgrep -f '[b]in/linux64/srcds|[b]in/linux32/srcds' >/dev/null
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30m
+
+  gterm-relay:
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-gterm-relay:${AGENT_TOOLKIT_VERSION:-main}
+    pull_policy: always
+    network_mode: service:gmod
+    depends_on:
+      gmod:
+        condition: service_started
+    init: true
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: local
+      options:
+        max-size: 1m
+        max-file: "2"
+
+volumes:
+  gmod_data:
+    name: agent_toolkit_gmod_data
