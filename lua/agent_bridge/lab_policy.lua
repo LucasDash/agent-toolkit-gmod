@@ -2,15 +2,23 @@
 if not SERVER then return end
 local enabled = CreateConVar("agent_bridge_lab_policy", "0", FCVAR_ARCHIVE,
     "Apply the restricted Agent Bridge lab player policy on this server.")
+
+local function restrictedPlayer(ply)
+    return enabled:GetBool()
+        and IsValid(ply)
+        and ply:IsPlayer()
+        and not ply:IsAdmin()
+end
+
 local function ordinaryUser(ply)
-    if enabled:GetBool() and IsValid(ply) and ply:IsPlayer() and ply:GetUserGroup() ~= "user" then
+    if restrictedPlayer(ply) and ply:GetUserGroup() ~= "user" then
         ply:SetUserGroup("user")
     end
 end
 hook.Add("PlayerInitialSpawn", "AgentBridge.LabPolicy.User", ordinaryUser)
 hook.Add("PlayerSpawn", "AgentBridge.LabPolicy.User", ordinaryUser)
 hook.Add("PlayerLoadout", "AgentBridge.LabPolicy.Loadout", function(ply)
-    if not enabled:GetBool() then return end
+    if not restrictedPlayer(ply) then return end
     ply:StripWeapons()
     ply:RemoveAllAmmo()
     ply:Give("weapon_fists")
@@ -23,13 +31,13 @@ for _, event in ipairs({
     "PlayerSpawnSENT", "PlayerSpawnVehicle", "PlayerSpawnSWEP", "PlayerGiveSWEP",
     "CanTool", "CanProperty"
 }) do
-    hook.Add(event, "AgentBridge.LabPolicy.Restrict", function()
-        if enabled:GetBool() then return false end
+    hook.Add(event, "AgentBridge.LabPolicy.Restrict", function(ply)
+        if restrictedPlayer(ply) then return false end
     end)
 end
 
 hook.Add("PlayerNoClip", "AgentBridge.LabPolicy.NoClip", function(ply, desiredState)
-    if not enabled:GetBool() then return end
+    if not restrictedPlayer(ply) then return end
     if desiredState then
         return false -- Prevent entering noclip.
     end

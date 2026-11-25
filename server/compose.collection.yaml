@@ -1,0 +1,47 @@
+services:
+  gmod:
+    # Keep the base runtime fixed for repeatable local collection checks.
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-server@sha256:bb213ad338caa4000722e34f1d75fd4fa14b4511ba9761887288d50d5f3e4b69
+    command:
+      - +gamemode
+      - ${SERVER_GAMEMODE:-sandbox}
+      - +sv_lan
+      - "0"
+      - +map
+      - ${SERVER_MAP:-gm_construct}
+      - +maxplayers
+      - ${SERVER_MAXPLAYERS:-8}
+      - +host_workshop_collection
+      - ${SERVER_WORKSHOP_COLLECTION:-3829225986}
+      - +host_workshop_autoupdate
+      - "1"
+    mem_limit: 4g
+    memswap_limit: 6g
+    cpus: 2
+    pids_limit: 512
+    volumes:
+      - type: bind
+        source: ./addons/agent_suite_playtest
+        target: /srv/gmod/server/garrysmod/addons/agent_suite_playtest
+        read_only: true
+      - type: bind
+        source: ./.state/collection/operator_steamid64.txt
+        target: /srv/gmod/server/garrysmod/data/agent_suite_operator_steamid64.txt
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./config/ulx-motd.txt
+        target: /srv/gmod/server/garrysmod/data/ulx/motd.txt
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./config/ulx-adverts.txt
+        target: /srv/gmod/server/garrysmod/data/ulx/adverts.txt
+        read_only: true
+        bind:
+          create_host_path: false
+
+  gterm-relay:
+    image: ghcr.io/lucasdash/agent-toolkit-gmod-gterm-relay@sha256:fc60c9cc43493fc6886a6d523496a80d345d2b90844e767c4893817ac940e90e

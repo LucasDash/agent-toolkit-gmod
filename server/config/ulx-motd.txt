@@ -1,0 +1,100 @@
+; Agent Suite local playtest MOTD. This file is bind-mounted read-only by
+; compose.collection.yaml so the workshop test screen stays versioned.
+
+"info"
+{
+	"description" "Veejay NPC | Private Local Playtest"
+	{
+		"title" "Welcome"
+		"type" "text"
+		"contents"
+		{
+			"This is the Agent Suite Sandbox for testing the Veejay NPC and its supporting addons."
+			"Veejay is a development prototype; visuals, behavior, and integration can change between sessions."
+		}
+	}
+	{
+		"title" "Development Update"
+		"type" "text"
+		"contents"
+		{
+			"Current iteration: Veejay is being evaluated as an NPC in the private Agent Suite playtest."
+			"The fixed Workshop collection keeps the playtest setup consistent while we gather behavior and physics feedback."
+		}
+	}
+	{
+		"title" "Quick Start"
+		"type" "ordered_list"
+		"contents"
+		{
+			"Open the spawn menu (Q), choose NPCs > Veejay, then select Veejay (Companion Prototype)."
+			"Wait for Workshop downloads to finish before spawning. If the model or materials are missing, report it with a screenshot."
+		}
+	}
+	{
+		"title" "Playtest Notes"
+		"type" "list"
+		"contents"
+		{
+			"When reporting an issue, include the map, what you did, and the result you expected."
+			"Dash Reality can change physics and NPC interactions; mention any relevant option you changed."
+			"This is a private development session, not a public release."
+		}
+	}
+	{
+		"title" "Workshop Addons"
+		"type" "mods"
+	}
+	{
+		"title" "Admin and Tools"
+		"type" "text"
+		"contents"
+		{
+			"ULib and ULX provide server administration. Dash Reality adds Sandbox tools and settings."
+			"The Veejay prototype is admin-only in the spawn menu."
+		}
+	}
+}
+"style"
+{
+	"borders"
+	{
+		"border_color" "#24384b"
+		"border_thickness" "2px"
+	}
+	"colors"
+	{
+		"background_color" "#e7edf2"
+		"header_color" "#294b67"
+		"header_text_color" "#f7f9fb"
+		"section_text_color" "#173247"
+		"text_color" "#202b34"
+	}
+	"fonts"
+	{
+		"server_name"
+		{
+			"family" "Tahoma"
+			"size" "30px"
+			"weight" "bold"
+		}
+		"subtitle"
+		{
+			"family" "Tahoma"
+			"size" "18px"
+			"weight" "bold"
+		}
+		"section_title"
+		{
+			"family" "Tahoma"
+			"size" "23px"
+			"weight" "bold"
+		}
+		"regular"
+		{
+			"family" "Tahoma"
+			"size" "13px"
+			"weight" "normal"
+		}
+	}
+}

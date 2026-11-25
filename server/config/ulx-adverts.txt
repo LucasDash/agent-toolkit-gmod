@@ -1,0 +1,16 @@
+; Agent Suite private playtest reminders.
+; Entries without time_on_screen appear in chat; entries with it appear centered.
+; The time field is the interval between displays, in seconds.
+
+{
+	"text" "Veejay is a private prototype. Spawn her from Q > NPCs > Veejay."
+	"red" "145"
+	"green" "210"
+	"blue" "255"
+	"time_on_screen" "7"
+	"time" "900"
+}
+{
+	"text" "Playtest note: include the map, steps, expected and actual result, and a screenshot for visual issues."
+	"time" "1500"
+}

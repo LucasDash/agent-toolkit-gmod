@@ -78,6 +78,74 @@ client Lua are disabled, and the existing Agent Bridge lab policy is enabled.
 It starts `gm_construct` in Sandbox with eight slots. No Workshop collection,
 GWater, vFire, ULX or other optional addon is mounted.
 
+### Optional Workshop collection playtest
+
+The default server remains collection-free. To launch the Agent Suite
+collection with the same map, gamemode, slot count and Steam authentication,
+run this from the `server` directory:
+
+```powershell
+docker compose --file compose.yaml --file compose.collection.yaml --env-file .env up --detach --force-recreate gmod gterm-relay
+```
+
+`SERVER_WORKSHOP_COLLECTION` defaults to `3829225986`. This overlay pins the
+server and relay image digests used for the check, caps the server at 4 GB
+memory, 6 GB memory-plus-swap and 2 CPUs, and mounts a small local playtest
+integration addon and a generated local operator file read-only. Before starting,
+copy `.env.example` to `.env` if needed, set
+`AGENT_SUITE_OPERATOR_STEAMID64` to the local operator's 17-digit SteamID64
+(or `0` for no configured operator), then run
+`./Prepare-Collection-Playtest.ps1`. It writes the ignored
+`.state/collection/operator_steamid64.txt`; the SteamID is not printed or tracked.
+The addon reads it from the server's `DATA` filesystem, avoiding the managed
+base `server.cfg`. The
+collection contains Dash Reality (3829248229),
+ULib (557962238), ULX (557962280), and Veejay NPC Prototype (3845592300). The
+2026-11-25 Unlisted-item check fetched and mounted all four. ULX loaded after
+ULib as expected; Agent Bridge's optional Dash Reality adapter is server-side.
+The overlay bind-mounts [`config/ulx-motd.txt`](config/ulx-motd.txt) and
+[`config/ulx-adverts.txt`](config/ulx-adverts.txt) read-only as ULX's MOTD and
+advertisement settings. Edit those tracked files and recreate the GMod service
+to apply changes; XGUI edits to the mounted files are intentionally unavailable.
+The MOTD uses ULX's supported text, list and installed-addon sections. The
+advertisement file uses one low-frequency center-screen tip and one slower chat
+reminder.
+
+The server collection mounts Veejay's files for the server, but clients also
+need the Workshop item. The local integration addon calls
+`resource.AddWorkshop("3845592300")` for joining clients. ULib and ULX are
+server-content packages and are not sent to clients. The integration also
+grants ULX superadmin to the one local operator identified by the generated
+local data file after `Player:IsFullyAuthenticated()` succeeds. It listens to
+initial spawn and authentication events, with ULib's `UCLAuthed` event as a
+second path. It uses the existing UCL user record when available and lets
+`ucl.addUser` persist and probe the grant. The protected CVar used by the lab
+policy is synchronized from the same file. The addon also checks an
+already-connected operator on hot reload.
+It does not read host environment variables from GMod Lua. ULib persists grants
+in its user database, so when changing or disabling the operator, remove the
+old entry with `ulx removeuserid <SteamID>` as well. Use the ULib registered
+SteamID (usually `STEAM_0:X:Y`), not the configured SteamID64.
+The lab policy keeps its restrictions for other players and permits configured
+operators and ULX admins to use Sandbox tools. The local playtest addon
+rebinds Agent Bridge's policy hooks after addons load, preserving its
+restrictions for other players while honoring ULX admins and the configured
+operator. This keeps the collection test compatible with the installed Agent
+Bridge revision without changing its Workshop content.
+
+The collection visibility may be Public or Unlisted; Hidden items cannot be
+fetched by the anonymous dedicated server. Collection membership and Workshop
+item updates are checked on server restart. A successful mount is not proof of
+client asset delivery; confirm it with a real client join and model spawn. The
+overlay sets `host_workshop_autoupdate 1`, so installed Workshop content is
+checked for updates on each server start.
+
+For this local setup, the owner reconnected to `192.168.1.101:28115` after the
+post-auth policy correction and confirmed Veejay spawned from the NPC menu on
+2026-11-25. This is owner-observed evidence of one client spawn; it does not
+verify rendering on other clients, multi-client behavior or other gameplay
+systems.
+
 The server image uses the pinned Debian Trixie SteamCMD image so its glibc is
 new enough for the pinned GTerm-Codex Linux module. The module is fetched from
 the pinned GTerm-Codex commit in the Dockerfile and checked against its SHA-256

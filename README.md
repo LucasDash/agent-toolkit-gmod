@@ -76,6 +76,10 @@ separately. The GTerm relay should remain loopback-only. To reproduce an exact
 image build, set `AGENT_TOOLKIT_VERSION` to an immutable `sha-<commit>` tag
 instead of the moving `main` tag.
 
+To run the optional Agent Suite Workshop collection while retaining the
+standard server settings, follow the
+[collection playtest instructions](server/README.md#optional-workshop-collection-playtest).
+
 See the [server operations guide](server/README.md) for local source builds,
 update and backup procedures, port and host configuration, and deployment
 limits. The server image installs the Garry's Mod dedicated-server files into
